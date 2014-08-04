@@ -113,7 +113,7 @@ void DCMotor :: left (int angle) {
 	left_speed = MAX_SPEED/4;
 	right_speed = MAX_SPEED/4;
 	ticks_limit = Func_Angle(angle);
-		while(count_left_ticks <=ticks_limit/2 || count_right_ticks <=ticks_limit/2){
+		while(count_left_ticks <=ticks_limit || count_right_ticks <=ticks_limit){
 			digitalWrite(PIN_MOTOR_LEFT, HIGH);
 			digitalWrite(PIN_MOTOR_RIGHT, LOW );
 			analogWrite(PIN_PWM_LEFT,left_speed);
@@ -137,7 +137,7 @@ void DCMotor :: right (int angle) {
 	left_speed = MAX_SPEED/4;
 	right_speed = MAX_SPEED/4;
 	ticks_limit = Func_Angle(angle);
-		while(count_left_ticks <=ticks_limit/2 || count_right_ticks <=ticks_limit/2){
+		while(count_left_ticks <=ticks_limit || count_right_ticks <=ticks_limit){
 			digitalWrite(PIN_MOTOR_LEFT, LOW);
 			digitalWrite(PIN_MOTOR_RIGHT, HIGH );
 			analogWrite(PIN_PWM_LEFT,left_speed);
