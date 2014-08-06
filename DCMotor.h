@@ -5,7 +5,7 @@ class DCMotor {
 public :
 DCMotor ( float _kp, float _kd, float _ki ) ;
   void begin ( ) ;
-  void forward(int distance) ;
+  void forward(unsigned int distance) ;
   void stop( ) ;
   void left(int angle) ;
   void right(int angle) ;
@@ -19,11 +19,11 @@ private :
   int left_speed ;
   int right_speed ;
   long last_check_inst ;
-  int ticks_limit;
+  unsigned int ticks_limit;
   int Func_Angle(int angle);
-  int Func_Dist(int distance);
+  unsigned int Func_Dist(unsigned int distance);
   void setMotorVelocity ( ) ;
-  void doPID (int,int ) ;
+  void doPID () ;
   int kp ; //PID proportional gain constant
   float kd ; //PID derivative gain constant
   float ki ; //PID intergral gain constant

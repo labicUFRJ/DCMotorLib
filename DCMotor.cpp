@@ -11,7 +11,7 @@
 #define SAMPLINGS 1000 / SAMPLING_RATE
 #define PIN_PWM_LEFT 5
 #define PIN_PWM_RIGHT 7
-#define RADIUS_WHEEL 12
+#define RADIUS_WHEEL 3
 #define PI 3.14
 #define ANGLE_PER_TICK 1.08			// 360/333 agunlo por tick
 #define TICKS_PER_TURN 333		// uma volta
@@ -22,8 +22,8 @@ int DCMotor ::count_error_left = 0;
 int DCMotor ::count_error_right = 0;
 
 DCMotor :: DCMotor(float _kp, float _kd, float _ki) {
-	left_speed = MAX_SPEED;
-	right_speed = MAX_SPEED;
+	left_speed = MAX_SPEED/3;
+	right_speed = MAX_SPEED/3;
 	kp = _kp ;
 	kd = _kd ;
 	ki = _ki ;
@@ -50,7 +50,7 @@ void DCMotor :: setMotorVelocity ( ) {
 	analogWrite(PIN_PWM_RIGHT,right_speed);
 }
 
-void DCMotor :: forward (int distance ) {
+void DCMotor :: forward (unsigned int distance ) {
 	ticks_limit =Func_Dist(distance);
 	Serial.print("ticks limit: ");
 	Serial.println(ticks_limit);
@@ -58,31 +58,35 @@ void DCMotor :: forward (int distance ) {
 	{
 		left_speed = vel[0];
 	}else{
-		left_speed = MAX_SPEED;
+		left_speed = MAX_SPEED/3;
 	}
 	
 	if (vel[1])
 	{
 		right_speed = vel[1];
 	}else{
-		right_speed = MAX_SPEED;
+		right_speed = MAX_SPEED/3;
 	}
 
 	count_error_left = ticks_limit;
 	count_error_right = ticks_limit;
 	setMotorVelocity();
-	while(count_error_left > 0 || count_error_right > 0 ){
-		Serial.print(" left ticks : ");
+	//while(count_left_ticks <=ticks_limit || count_right_ticks <=ticks_limit){
+	while(count_error_left >= 0 || count_error_right >= 0 ){
+		/*Serial.print(" left ticks : ");
 		Serial.println(count_left_ticks);
 		Serial.print("right ticks: ");
 		Serial.println(count_right_ticks);
 		Serial.print(" left error : ");
 		Serial.println(count_error_left);
 		Serial.print("right error: ");
-		Serial.println(count_error_right);
-		doPID(count_left_ticks,count_right_ticks);
-		count_error_left -= count_left_ticks;
-		count_error_right -= count_right_ticks;
+		Serial.println(count_error_right);*/
+		//count_error_left -= count_left_ticks;
+		//count_error_right -= count_right_ticks;
+		//doPID(count_left_ticks,count_right_ticks);
+		//DCMotor::stop();
+		//delay(500);
+		doPID();
 		left_speed = vel[0];
 		right_speed = vel[1];
 		setMotorVelocity();
@@ -96,10 +100,16 @@ void DCMotor :: forward (int distance ) {
 	Serial.println(count_left_ticks);
 	Serial.print("right ticks: ");
 	Serial.println(count_right_ticks);
+	Serial.print(" left error : ");
+	Serial.println(count_error_left);
+	Serial.print("right error: ");
+	Serial.println(count_error_right);
 	DCMotor::stop();
 	delay(1000);
 	count_left_ticks = 0;
 	count_right_ticks = 0;
+	count_error_left = 0;
+	count_error_right = 0;
 	
 }
 
@@ -157,7 +167,7 @@ void DCMotor :: right (int angle) {
 		count_right_ticks = 0;	
 }	
 	
-void DCMotor :: doPID(int count_left_error, int count_right_error ) {
+void DCMotor :: doPID() {
 	int errorl ; // error from left encoder
 	int errorr ; // error from right encoder
 	int derrorl ; // derivative error left
@@ -168,16 +178,14 @@ void DCMotor :: doPID(int count_left_error, int count_right_error ) {
 		// calculate error values
 		errorl = setpoint - count_left_ticks ;
 		errorr = setpoint - count_right_ticks ;
-		//errorl = setpoint - count_left_ticks ;
-		//errorr = setpoint - count_right_ticks ;
-		Serial.print("Esq = ");
+		/*Serial.print("Esq = ");
 		Serial.println(count_left_ticks);
 		Serial.print("Dir = ");
 		Serial.println(count_right_ticks);
 		Serial.print("Esq speed = ");
 		Serial.println(left_speed);
 		Serial.print("Dir speed = ");
-		Serial.println(right_speed);
+		Serial.println(right_speed);*/
 		// reset encoder counts ready for next sample
 		count_left_ticks = 0 ;
 		count_right_ticks = 0 ;
@@ -185,10 +193,10 @@ void DCMotor :: doPID(int count_left_error, int count_right_error ) {
 		derrorr = errorr - preverrorr;
 		cl = (( kp * errorl ) + ( kd * derrorl ) + ( ki * Ierrorl )) ; //PID equations
 		cr = (( kp * errorr ) + ( kd * derrorr ) + ( ki * Ierrorr )) ;
-		Serial.print("Esq cl = ");
+		/*Serial.print("Esq cl = ");
 		Serial.println(cl);
 		Serial.print("Dir cr = ");
-		Serial.println(cr);
+		Serial.println(cr);*/
 		if(count_left_ticks < count_right_ticks){
 				if (( left_speed + cl ) > MAX_SPEED)
 				// prevent speed from over running MAX_SPEED
@@ -218,14 +226,14 @@ void DCMotor :: doPID(int count_left_error, int count_right_error ) {
 		//delay(100);
 		//count_left_ticks = 0 ;
 		//count_right_ticks = 0 ;
-		Serial.print("vel0 = ");
+		/*Serial.print("vel0 = ");
 		Serial.println(vel[0]);
 		Serial.print("vel1= ");
 		Serial.println(vel[1]);		
 		Serial.print("left ticks:");
 		Serial.println(count_left_ticks);
 		Serial.print("right ticks: ");
-		Serial.println(count_right_ticks);
+		Serial.println(count_right_ticks);*/
 		preverrorl = errorl ;
 		preverrorr = errorr ;
 		//add current error to integral error
@@ -236,10 +244,12 @@ void DCMotor :: doPID(int count_left_error, int count_right_error ) {
 
 void DCMotor::inc_left_ticks( ){
 	DCMotor::count_left_ticks++;
+	DCMotor ::count_error_left--;
 }
 
 void DCMotor::inc_right_ticks( ){
 	DCMotor::count_right_ticks++;
+	DCMotor ::count_error_right--;
 }
 
 int DCMotor:: Func_Angle(int angle){
@@ -247,7 +257,7 @@ int DCMotor:: Func_Angle(int angle){
 	return (angle/ANGLE_PER_TICK);
 }
 
-int DCMotor:: Func_Dist(int distance){//verificar proporção
+unsigned int DCMotor:: Func_Dist(unsigned int distance){//verificar proporção
 	return ((distance*TICKS_PER_TURN)/(2*PI*RADIUS_WHEEL));
 }
 
