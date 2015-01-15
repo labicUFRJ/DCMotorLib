@@ -28,6 +28,7 @@ DCMotor :: DCMotor(float _kp, float _kd, float _ki) {
 	kd = _kd ;
 	ki = _ki ;
 }
+
 void DCMotor :: begin (){
 	last_check_inst = millis ( ) ;
 	Serial.print("begin =======================> ");
