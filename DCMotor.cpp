@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include <DCMotor.h>
 
-//Medidas rover 5: robo24x24 cm ;~=333 ticks por volta da roda ;1.08 graus por tick; 6cm de raio da roda; ~=36cm de comprimento de roda
+//Medidas rover 5: robo24x24 cm ;~=333 ticks por volta da roda ;1.08 graus por tick; 3cm de raio da roda; ~=18cm de comprimento de roda
 #define MAX_SPEED 255
 #define PIN_MOTOR_LEFT 4
 #define PIN_MOTOR_RIGHT 6
@@ -14,7 +14,7 @@
 #define RADIUS_WHEEL 3
 #define PI 3.14
 #define ANGLE_PER_TICK 1.08			// 360/333 agunlo por tick
-#define TICKS_PER_TURN 333		// uma volta
+#define TICKS_PER_TURN 333		// 333 por volta
 
 int DCMotor :: count_left_ticks = 0 ;
 int DCMotor :: count_right_ticks = 0 ;
@@ -254,7 +254,8 @@ void DCMotor::inc_right_ticks( ){
 }
 
 int DCMotor:: Func_Angle(int angle){
-	angle = angle*6; // angulo*(fator de proporcao do raio da roda com o raio do robo + uma correção de erro(4 + 2)) 
+//	angle = angle*6; // angulo*(fator de proporcao do raio da roda com o raio do robo + uma correção de erro(4 + 2)) 
+	angle = angle*4; // angulo*(fator de proporcao do raio da roda com o raio do robo)
 	return (angle/ANGLE_PER_TICK);
 }
 
