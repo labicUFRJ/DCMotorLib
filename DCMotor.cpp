@@ -44,6 +44,7 @@ void DCMotor :: begin (){
 	pinMode(PIN_PWM_LEFT,OUTPUT);
 	pinMode(PIN_PWM_RIGHT,OUTPUT);
 }
+
 void DCMotor :: setMotorVelocity ( ) {
 	digitalWrite (PIN_MOTOR_LEFT, LOW);
 	digitalWrite (PIN_MOTOR_RIGHT, LOW ) ;
@@ -121,8 +122,8 @@ void DCMotor :: stop ( ) {
 }
 
 void DCMotor :: left (int angle) {
-	left_speed = MAX_SPEED/4;
-	right_speed = MAX_SPEED/4;
+	left_speed = MAX_SPEED/2;
+	right_speed = MAX_SPEED/2;
 	ticks_limit = Func_Angle(angle);
 		while(count_left_ticks <=ticks_limit || count_right_ticks <=ticks_limit){
 			digitalWrite(PIN_MOTOR_LEFT, HIGH);
@@ -145,29 +146,29 @@ void DCMotor :: left (int angle) {
 }
 
 void DCMotor :: right (int angle) {
-	left_speed = MAX_SPEED/4;
-	right_speed = MAX_SPEED/4;
+	left_speed = MAX_SPEED/2;
+	right_speed = MAX_SPEED/2;
 	ticks_limit = Func_Angle(angle);
-		while(count_left_ticks <=ticks_limit || count_right_ticks <=ticks_limit){
-			digitalWrite(PIN_MOTOR_LEFT, LOW);
-			digitalWrite(PIN_MOTOR_RIGHT, HIGH );
-			analogWrite(PIN_PWM_LEFT,left_speed);
-			analogWrite(PIN_PWM_RIGHT,right_speed);
-			Serial.print("left ticks: ");
-			Serial.println(count_left_ticks);
-			Serial.print("right ticks: ");
-			Serial.println(count_right_ticks);
-		}
-		Serial.println("ticks passaram");
-		Serial.print("ticks limit: ");
-		Serial.println(ticks_limit);
-		left_speed = 0;
-		right_speed = 0;
-		setMotorVelocity();
-		count_left_ticks = 0;
-		count_right_ticks = 0;	
-}	
-	
+	while(count_left_ticks <=ticks_limit || count_right_ticks <=ticks_limit){
+		digitalWrite(PIN_MOTOR_LEFT, LOW);
+		digitalWrite(PIN_MOTOR_RIGHT, HIGH );
+		analogWrite(PIN_PWM_LEFT,left_speed);
+		analogWrite(PIN_PWM_RIGHT,right_speed);
+		Serial.print("left ticks: ");
+		Serial.println(count_left_ticks);
+		Serial.print("right ticks: ");
+		Serial.println(count_right_ticks);
+	}
+	Serial.println("ticks passaram");
+	Serial.print("ticks limit: ");
+	Serial.println(ticks_limit);
+	left_speed = 0;
+	right_speed = 0;
+	setMotorVelocity();
+	count_left_ticks = 0;
+	count_right_ticks = 0;
+}
+
 void DCMotor :: doPID() {
 	int errorl ; // error from left encoder
 	int errorr ; // error from right encoder
@@ -175,7 +176,7 @@ void DCMotor :: doPID() {
 	int derrorr ; // derivative error right
 	int cl ;
 	int cr ;
-	int setpoint = ticks_limit/PART;
+	int setpoint = ticks_limit;
 		// calculate error values
 		errorl = setpoint - count_left_ticks ;
 		errorr = setpoint - count_right_ticks ;
@@ -210,12 +211,12 @@ void DCMotor :: doPID() {
 		}else if(count_left_ticks > count_right_ticks){
 				if (( right_speed + cr ) > MAX_SPEED)
 				//where speed is PWM output values
-					right_speed = MAX_SPEED;	
+					right_speed = MAX_SPEED;
 				else if (( right_speed + cr ) < MAX_SPEED/2)
 					right_speed = MAX_SPEED;
 				else
 					right_speed = right_speed + cr ;
-					// set previous error to current error				
+					// set previous error to current error
 			}
 		else{
 			right_speed = right_speed;
@@ -256,10 +257,10 @@ void DCMotor::inc_right_ticks( ){
 int DCMotor:: Func_Angle(int angle){
 //	angle = angle*6; // angulo*(fator de proporcao do raio da roda com o raio do robo + uma correção de erro(4 + 2)) 
 	angle = angle*4; // angulo*(fator de proporcao do raio da roda com o raio do robo)
-	return (angle/ANGLE_PER_TICK);
+	return (angle/ANGLE_PER_TICK) + (angle/ANGLE_PER_TICK)*0.25;
 }
 
-unsigned int DCMotor:: Func_Dist(unsigned int distance){//verificar proporção
+unsigned int DCMotor:: Func_Dist(unsigned int distance){
 	return ((distance*TICKS_PER_TURN)/(2*PI*RADIUS_WHEEL));
 }
 
